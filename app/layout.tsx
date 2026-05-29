@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   description: 'Base ağında en yüksek hacimli ve yeni tokenleri takip et',
   other: {
     'fc:frame': 'vNext',
+    'base:app_id': '69afd436058cbf5b767c47f0',
   },
 }
 
