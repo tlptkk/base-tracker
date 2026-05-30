@@ -9,7 +9,7 @@ export const minikitConfig = {
   },
   miniapp: {
     version: '1',
-    name: 'Base Tracker',
+    name: 'baseDS',
     subtitle: 'Base Ağı Canlı Veriler',
     description:
       'Base ağındaki en yüksek 24s hacimli tokenları ve anlık deploy edilen yeni tokenleri takip et.',
@@ -21,7 +21,7 @@ export const minikitConfig = {
     primaryCategory: 'finance',
     tags: ['defi', 'tokens', 'base', 'tracker', 'volume'],
     heroImageUrl: `${ROOT_URL}/hero.png`,
-    ogTitle: 'Base Tracker',
+    ogTitle: 'baseDS',
     ogDescription: 'Base ağında en yüksek hacimli ve yeni tokenları anlık takip et',
     ogImageUrl: `${ROOT_URL}/hero.png`,
   },

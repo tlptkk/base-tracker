@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Base Tracker',
+  title: 'baseDS',
   description: 'Base ağında en yüksek hacimli ve yeni tokenleri takip et',
   other: {
     'fc:frame': 'vNext',
