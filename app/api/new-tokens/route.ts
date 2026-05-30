@@ -1,25 +1,19 @@
 import { NextResponse } from 'next/server'
 
-// DexScreener API - Yeni token profilleri (Base ağı filtreli)
-// Ücretsiz, API key gerektirmez, rate limit: 60 req/min
 export async function GET() {
   try {
     const [profilesRes, newPairsRes] = await Promise.all([
-      // En son token profilleri
+      // DexScreener - En son token profilleri
       fetch('https://api.dexscreener.com/token-profiles/latest/v1', {
         next: { revalidate: 30 },
       }),
-      // Base'de yeni pair'lar (GeckoTerminal)
-      fetch(
-        'https://api.geckoterminal.com/api/v2/networks/base/pools?sort=pool_created_at_desc&page=1',
-        {
-          headers: { Accept: 'application/json;version=20230302' },
-          next: { revalidate: 30 },
-        }
-      ),
+      // DexScreener - Base'de en yeni pair'lar
+      fetch('https://api.dexscreener.com/latest/dex/search?q=base&order=pairCreatedAt&chainIds=base', {
+        next: { revalidate: 30 },
+      }),
     ])
 
-    // DexScreener token profilleri
+    // DexScreener token profilleri (Base filtreli)
     let newTokens: any[] = []
     if (profilesRes.ok) {
       const profiles = await profilesRes.json()
@@ -36,31 +30,33 @@ export async function GET() {
         }))
     }
 
-    // GeckoTerminal yeni pool'lar
+    // DexScreener - Yeni pair'lar
     let newPairs: any[] = []
     if (newPairsRes.ok) {
       const pairsData = await newPairsRes.json()
-      newPairs = (pairsData.data || []).slice(0, 20).map((pool: any) => {
-        const attr = pool.attributes
-        return {
-          id: pool.id,
-          name: attr.name,
-          address: attr.address,
-          baseToken: {
-            name: attr.base_token_name,
-            symbol: attr.base_token_symbol,
-            address: attr.base_token_address,
-          },
-          price: parseFloat(attr.base_token_price_usd || '0'),
-          volume24h: parseFloat(attr.volume_usd?.h24 || '0'),
-          liquidity: parseFloat(attr.reserve_in_usd || '0'),
-          priceChange5m: parseFloat(attr.price_change_percentage?.m5 || '0'),
-          priceChange1h: parseFloat(attr.price_change_percentage?.h1 || '0'),
-          createdAt: attr.pool_created_at,
-          dexscreenerUrl: `https://dexscreener.com/base/${attr.address}`,
-          source: 'geckoterminal',
-        }
-      })
+      const pairs = (pairsData.pairs || [])
+        .filter((p: any) => p.chainId === 'base')
+        .sort((a: any, b: any) => (b.pairCreatedAt || 0) - (a.pairCreatedAt || 0))
+        .slice(0, 20)
+
+      newPairs = pairs.map((p: any) => ({
+        id: p.pairAddress,
+        name: `${p.baseToken?.symbol}/${p.quoteToken?.symbol}`,
+        address: p.pairAddress,
+        baseToken: {
+          name: p.baseToken?.name || '',
+          symbol: p.baseToken?.symbol || '',
+          address: p.baseToken?.address || '',
+        },
+        price: parseFloat(p.priceUsd || '0'),
+        volume24h: p.volume?.h24 || 0,
+        liquidity: p.liquidity?.usd || 0,
+        priceChange5m: p.priceChange?.m5 || 0,
+        priceChange1h: p.priceChange?.h1 || 0,
+        createdAt: p.pairCreatedAt ? new Date(p.pairCreatedAt).toISOString() : '',
+        dexscreenerUrl: p.url || `https://dexscreener.com/base/${p.pairAddress}`,
+        source: 'dexscreener',
+      }))
     }
 
     return NextResponse.json({ newTokens, newPairs })
