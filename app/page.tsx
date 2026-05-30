@@ -254,7 +254,7 @@ export default function Home() {
               B
             </div>
             <div>
-              <h1 className="font-black text-white text-lg leading-none">Base Tracker</h1>
+              <h1 className="font-black text-white text-lg leading-none">baseDS</h1>
               <p className="text-xs text-gray-500">Base Network · Canlı Veri</p>
             </div>
           </div>
